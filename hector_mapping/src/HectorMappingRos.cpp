@@ -95,7 +95,7 @@ HectorMappingRos::HectorMappingRos()
   // Offset (ROS Duration) to add to pose data when publishing it. A
   // positive value shifts the pose ts to the future and enables using
   // move base to move around while mapping.
-  private_nh_.param("pose_ts_offset", p_pose_ts_offset_, 1.0);
+  private_nh_.param("transform_tolerance", p_transform_tolerance_, 1.0);
 
   double tmp = 0.0;
   private_nh_.param("laser_min_dist", tmp, 0.4);
@@ -181,7 +181,7 @@ HectorMappingRos::HectorMappingRos()
   ROS_INFO("HectorSM p_map_update_angle_threshold_: %f", p_map_update_angle_threshold_);
   ROS_INFO("HectorSM p_laser_z_min_value_: %f", p_laser_z_min_value_);
   ROS_INFO("HectorSM p_laser_z_max_value_: %f", p_laser_z_max_value_);
-  ROS_INFO("HectorSM p_pose_ts_offset_: %f", p_pose_ts_offset_);
+  ROS_INFO("HectorSM p_transform_tolerance_: %f", p_transform_tolerance_);
 
   scanSubscriber_ = node_.subscribe(p_scan_topic_, p_scan_subscriber_queue_size_, &HectorMappingRos::scanCallback, this);
   sysMsgSubscriber_ = node_.subscribe(p_sys_msg_topic_, 2, &HectorMappingRos::sysMsgCallback, this);
@@ -350,7 +350,7 @@ void HectorMappingRos::scanCallback(const sensor_msgs::LaserScan& scan)
       odom_to_base.setIdentity();
     }
     map_to_odom_ = tf::Transform(poseInfoContainer_.getTfTransform() * odom_to_base.inverse());
-    tfB_->sendTransform( tf::StampedTransform (map_to_odom_, scan.header.stamp + ros::Duration(p_pose_ts_offset_), p_map_frame_, p_odom_frame_));
+    tfB_->sendTransform( tf::StampedTransform (map_to_odom_, scan.header.stamp + ros::Duration(p_transform_tolerance_), p_map_frame_, p_odom_frame_));
   }
 
   if (p_pub_map_scanmatch_transform_){
